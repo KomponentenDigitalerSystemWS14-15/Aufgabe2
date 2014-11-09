@@ -19,3 +19,24 @@ END sync_buffer;
 -- Im Rahmen der 2. Aufgabe soll hier die Architekturbeschreibung
 -- zur Entity sync_buffer implementiert werden.
 --
+
+ARCHITECTURE behavioral OF sync_buffer IS
+BEGIN
+	PROCESS (rst, clk) BEGIN
+		IF rst = RSTDEF THEN
+			dout <= '0';
+			redge <= '0';
+			fedge <= '0';
+		ELSIF rising_edge(clk) THEN
+			IF swrst = RSTDEF THEN
+				dout <= '0';
+				redge <= '0';
+				fedge <= '0';
+			ELSIF en = '1' THEN
+				dout <= din;
+				redge <= rising_edge(din);
+				fedge <= falling_edge(din);
+			END IF;
+		END IF;
+	END PROCESS;
+END behavioral;
