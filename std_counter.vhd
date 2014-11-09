@@ -42,3 +42,31 @@ END std_counter;
 -- Im Rahmen der 2. Aufgabe soll hier die Architekturbeschreibung
 -- zur Entity std_counter implementiert werden
 --
+
+ARCHITECTURE behavioral OF std_counter IS
+	tmp_cnt : std_logic_vector(CNTLEN DOWNTO 0);
+BEGIN
+	PROCESS (rst, clk) BEGIN
+		IF rst = RSTDEF THEN
+			tmp_cnt <= (OTHERS => '0');
+		ELSIF rising_edge(clk) THEN
+			-- set carry to 0
+			tmp_cnt <= 0 & tmp_cnt(CNTLEN-1 DOWNTO 0);
+			IF swrst = RSTDEF THEN
+				tmp_cnt <= (OTHERS => '0');
+			ELSIF en = '1' THEN
+				IF load = '1' THEN
+					tmp_cnt <= (0 & din);
+				ELSIF dec = '1' THEN
+					tmp_cnt <= tmp_cnt - 1;
+				ELSIF inc = '1' THEN
+					tmp_cnt <= tmp_cnt + 1;
+				END IF;
+			END IF;
+		END IF;
+		
+		-- assign values to outports
+		cout <= tmp_cnt(CNTLEN);
+		dout <= tmp_cnt(CNTLEN-1 DOWNTO 0);
+	END PROCESS;
+END behavioral;
