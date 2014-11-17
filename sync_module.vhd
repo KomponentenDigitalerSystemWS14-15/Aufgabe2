@@ -17,9 +17,6 @@ ENTITY sync_module IS
 END sync_module;
 
 --
--- Im Rahmen der 2. Aufgabe soll hier die Architekturbeschreibung
--- zur Entity sync_module implementiert werden.
---
 
 ARCHITECTURE behavioral OF sync_module IS
 BEGIN

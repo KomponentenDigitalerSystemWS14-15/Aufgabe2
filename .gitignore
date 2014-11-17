@@ -2,3 +2,9 @@
 work/
 xwork/
 *.bit
+*.bak
+*.mpf
+*.mti
+*.swp
+
+transcript
