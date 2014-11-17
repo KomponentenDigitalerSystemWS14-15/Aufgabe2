@@ -35,7 +35,10 @@ ARCHITECTURE behavioral OF sync_buffer IS
     END COMPONENT;
        
     CONSTANT CNTLEN : natural := 5; -- after 32 clock cycles value is applied
+    CONSTANT CNTFULL : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '1');
+    CONSTANT CNTEMPTY : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
     SIGNAL cnt_inc : std_logic := '1';
+    SIGNAL cnt_dec : std_logic := '0';
     SIGNAL cnt_carry : std_logic;
     SIGNAL cnt_data : std_logic_vector(CNTLEN-1 DOWNTO 0);
 BEGIN
@@ -47,7 +50,7 @@ BEGIN
              clk => clk,
              en => en,
              inc => cnt_inc,
-             dec => '0',
+             dec => cnt_dec,
              load => '0',
              swrst =>swrst,
              cout => cnt_carry,
@@ -65,21 +68,35 @@ BEGIN
 				redge <= '0';
 				fedge <= '0';
 			ELSIF en = '1' THEN
-                IF din = '0' AND cnt_carry = '1' THEN
-                    cnt_inc <= '1'; -- increment until counter overflow
-                ELSIF din = '1' AND cnt_carry = '0' THEN
-                    cnt_inc <= '1'; -- increment until counter overflow
-                ELSE
-                    -- stop counter increment, reached stable state
-                    cnt_inc <= '0';
-                    dout <= din;
-                    -- TODO edge calculation may miss din edges
-                    redge <= '0';
-                    fedge <= '0';
-                    IF rising_edge(din) THEN
-                        redge <= '1';
-                    ELSIF falling_edge(din) THEN
-                        fedge <= '1';
+                cnt_inc <= '0';
+                cnt_dec <= '0';
+                IF din = '0' THEN
+                    IF cnt_data /= CNTEMPTY THEN
+                        cnt_dec <= '1'; -- decrement until counter empty
+                    ELSE
+                        dout <= din;
+                        -- TODO edge calculation may miss din edges
+                        redge <= '0';
+                        fedge <= '0';
+                        IF rising_edge(din) THEN
+                            redge <= '1';
+                        ELSIF falling_edge(din) THEN
+                            fedge <= '1';
+                        END IF;
+                    END IF;
+                ELSIF din = '1' THEN
+                    IF cnt_data /= CNTFULL THEN
+                        cnt_inc <= '1'; -- increment until counter full
+                    ELSE
+                        dout <= din;
+                        -- TODO edge calculation may miss din edges
+                        redge <= '0';
+                        fedge <= '0';
+                        IF rising_edge(din) THEN
+                            redge <= '1';
+                        ELSIF falling_edge(din) THEN
+                            fedge <= '1';
+                        END IF;
                     END IF;
                 END IF;
 			END IF;
