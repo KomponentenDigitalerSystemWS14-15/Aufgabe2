@@ -37,9 +37,8 @@ ARCHITECTURE behavioral OF sync_buffer IS
     CONSTANT CNTLEN : natural := 5; -- after 32 clock cycles value is applied
     CONSTANT CNTFULL : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '1');
     CONSTANT CNTEMPTY : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL cnt_inc : std_logic := '1';
+    SIGNAL cnt_inc : std_logic := '0';
     SIGNAL cnt_dec : std_logic := '0';
-    SIGNAL cnt_carry : std_logic;
     SIGNAL cnt_data : std_logic_vector(CNTLEN-1 DOWNTO 0);
 BEGIN
 
@@ -53,7 +52,7 @@ BEGIN
              dec => cnt_dec,
              load => '0',
              swrst =>swrst,
-             cout => cnt_carry,
+             cout => OPEN,
              din => (OTHERS => '0'),
              dout => cnt_data);
     
@@ -101,5 +100,5 @@ BEGIN
                 END IF;
 			END IF;
 		END IF;
-	END PROCESS; 
+	END PROCESS;
 END behavioral;
