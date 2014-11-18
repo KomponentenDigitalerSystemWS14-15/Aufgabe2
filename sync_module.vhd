@@ -46,9 +46,8 @@ ARCHITECTURE behavioral OF sync_module IS
     END COMPONENT;
 
     CONSTANT CNTLEN : natural := 15;
+    CONSTANT CNTIN : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
     SIGNAL div_carry : std_logic;
-    SIGNAL div_data : std_logic_vector(CNTLEN-1 DOWNTO 0);
-    SIGNAL sbuf_en :std_logic := '0';
 BEGIN
 
     freq_div : std_counter
@@ -62,14 +61,14 @@ BEGIN
              load => '0',
              swrst =>swrst,
              cout => div_carry,
-             din => (OTHERS => '0'),
-             dout => div_data);
+             din => CNTIN,
+             dout => OPEN);
     
     sbuf0 : sync_buffer
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
              clk => clk,
-             en => sbuf_en,
+             en => div_carry,
              swrst => swrst,
              din => BTN0,
              dout => load,
@@ -80,7 +79,7 @@ BEGIN
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
              clk => clk,
-             en => sbuf_en,
+             en => div_carry,
              swrst => swrst,
              din => BTN1,
              dout => dec,
@@ -91,28 +90,11 @@ BEGIN
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
              clk => clk,
-             en => sbuf_en,
+             en => div_carry,
              swrst => swrst,
              din => BTN2,
              dout => inc,
              redge => OPEN,
              fedge => OPEN);
-        
-	PROCESS (rst, clk) BEGIN
-		IF rst = RSTDEF THEN
-			load <= '0';
-			dec <= '0';
-			inc <= '0';
-		ELSIF rising_edge(clk) THEN
-			IF swrst = RSTDEF THEN
-				load <= '0';
-				dec <= '0';
-				inc <= '0';
-			ELSIF rising_edge(div_carry) OR falling_edge(div_carry) THEN
-                sbuf_en <= '1'; -- enable only for 1 cycle
-            ELSE
-                sbuf_en <= '0';
-			END IF;
-		END IF;
-	END PROCESS;
+
 END behavioral;

@@ -53,15 +53,18 @@ BEGIN
 				IF load = '1' THEN
 					cnt <= ('0' & din);
 				ELSIF dec = '1' THEN
+                    cnt(CNTLEN) <= '0';
 					cnt <= cnt - 1;
 				ELSIF inc = '1' THEN
+                    cnt(CNTLEN) <= '0';
 					cnt <= cnt + 1;
 				END IF;
 			END IF;
 		END IF;
-		
-		-- assign values to outports
-		cout <= cnt(CNTLEN);
-		dout <= cnt(CNTLEN-1 DOWNTO 0);
 	END PROCESS;
+    
+    -- assign values to outports
+    cout <= cnt(CNTLEN);
+    dout <= cnt(CNTLEN-1 DOWNTO 0);
+    
 END behavioral;
