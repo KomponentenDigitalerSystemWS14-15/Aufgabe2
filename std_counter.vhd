@@ -43,25 +43,33 @@ END std_counter;
 ARCHITECTURE behavioral OF std_counter IS
 	SIGNAL cnt : std_logic_vector(CNTLEN DOWNTO 0);
 BEGIN
-	PROCESS (rst, clk) BEGIN
-		IF rst = RSTDEF THEN
-			cnt <= (OTHERS => '0');
-		ELSIF rising_edge(clk) THEN
-			IF swrst = RSTDEF THEN
-				cnt <= (OTHERS => '0');
-			ELSIF en = '1' THEN
-				IF load = '1' THEN
-					cnt <= ('0' & din);
-				ELSIF dec = '1' THEN
-                    cnt(CNTLEN) <= '0';
-					cnt <= cnt - 1;
-				ELSIF inc = '1' THEN
-                    cnt(CNTLEN) <= '0';
-					cnt <= cnt + 1;
-				END IF;
-			END IF;
-		END IF;
-	END PROCESS;
+    PROCESS (rst, clk) BEGIN
+        IF rst = RSTDEF THEN
+            cnt <= (OTHERS => '0');
+        ELSIF rising_edge(clk) THEN
+            IF swrst = RSTDEF THEN
+                cnt <= (OTHERS => '0');
+            ELSIF en = '1' THEN
+                IF load = '1' THEN
+                    cnt <= ('0' & din);
+                ELSIF dec = '1' THEN                    
+                    IF cnt(CNTLEN) = '1' THEN
+                        cnt <= cnt - 1;
+                        cnt(CNTLEN) <= '0';
+                    ELSE
+                        cnt <= cnt - 1;
+                    END IF;
+                ELSIF inc = '1' THEN                 
+                    IF cnt(CNTLEN) = '1' THEN
+                        cnt <= cnt + 1;
+                        cnt(CNTLEN) <= '0';
+                    ELSE
+                        cnt <= cnt + 1;
+                    END IF;
+                END IF;
+            END IF;
+        END IF;
+    END PROCESS;
     
     -- assign values to outports
     cout <= cnt(CNTLEN);

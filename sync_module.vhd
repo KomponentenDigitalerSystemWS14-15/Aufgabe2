@@ -17,22 +17,7 @@ ENTITY sync_module IS
 END sync_module;
 
 ARCHITECTURE behavioral OF sync_module IS
-
-    COMPONENT std_counter IS
-    GENERIC(RSTDEF: std_logic;
-            CNTLEN: natural);
-    PORT(rst:   IN  std_logic;  -- reset,          RSTDEF active
-         clk:   IN  std_logic;  -- clock,           rising edge
-         en:    IN  std_logic;  -- enable,          high active
-         inc:   IN  std_logic;  -- increment,       high active
-         dec:   IN  std_logic;  -- decrement,       high active
-         load:  IN  std_logic;  -- load value,      high active
-         swrst: IN  std_logic;  -- software reset,  RSTDEF active
-         cout:  OUT std_logic;  -- carry,           high active        
-         din:   IN  std_logic_vector(CNTLEN-1 DOWNTO 0);
-         dout:  OUT std_logic_vector(CNTLEN-1 DOWNTO 0));
-    END COMPONENT;
-    
+   
     COMPONENT sync_buffer IS
     GENERIC(RSTDEF:  std_logic);
     PORT(rst:    IN  std_logic;  -- reset, RSTDEF active
@@ -46,55 +31,60 @@ ARCHITECTURE behavioral OF sync_module IS
     END COMPONENT;
 
     CONSTANT CNTLEN : natural := 15;
-    CONSTANT CNTIN : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL div_carry : std_logic;
+    SIGNAL cnt : std_logic_vector(CNTLEN-1 DOWNTO 0);
+    SIGNAL cnt_en : std_logic;
 BEGIN
 
-    freq_div : std_counter
-    GENERIC MAP(RSTDEF => RSTDEF,
-                CNTLEN => CNTLEN)
-    PORT MAP(rst => rst,
-             clk => clk,
-             en => '1',
-             inc => '1',
-             dec => '0',
-             load => '0',
-             swrst =>swrst,
-             cout => div_carry,
-             din => CNTIN,
-             dout => OPEN);
+    -- Frequenzteiler: Modulo 2^15
+    PROCESS (rst, clk)
+        VARIABLE cnt_tmp : std_logic_vector(CNTLEN DOWNTO 0);
+    BEGIN
+        IF rst = RSTDEF THEN
+            cnt_tmp := (OTHERS => '0');
+        ELSIF rising_edge(clk) THEN
+            IF swrst = RSTDEF THEN
+                cnt_tmp := (OTHERS => '0');
+            ELSE
+                cnt_tmp := '0' & cnt;
+                cnt_tmp := (cnt_tmp + 1);
+            END IF;
+        END IF;
+        
+        cnt_en <= cnt_tmp(CNTLEN);
+        cnt <= cnt_tmp(CNTLEN-1 DOWNTO 0);
+    END PROCESS;
     
     sbuf0 : sync_buffer
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
              clk => clk,
-             en => div_carry,
+             en => cnt_en,
              swrst => swrst,
              din => BTN0,
-             dout => load,
-             redge => OPEN,
+             dout => OPEN,
+             redge => load,
              fedge => OPEN);
              
     sbuf1 : sync_buffer
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
              clk => clk,
-             en => div_carry,
+             en => cnt_en,
              swrst => swrst,
              din => BTN1,
-             dout => dec,
+             dout => OPEN,
              redge => OPEN,
-             fedge => OPEN);
+             fedge => dec);
              
     sbuf2 : sync_buffer
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
              clk => clk,
-             en => div_carry,
+             en => cnt_en,
              swrst => swrst,
              din => BTN2,
-             dout => inc,
+             dout => OPEN,
              redge => OPEN,
-             fedge => OPEN);
+             fedge => inc);
 
 END behavioral;
