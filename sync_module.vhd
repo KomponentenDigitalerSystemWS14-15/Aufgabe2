@@ -31,27 +31,29 @@ ARCHITECTURE behavioral OF sync_module IS
     END COMPONENT;
 
     CONSTANT CNTLEN : natural := 15;
-    SIGNAL cnt : std_logic_vector(CNTLEN-1 DOWNTO 0);
+    SIGNAL cnt : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL cnt_tmp : std_logic_vector(CNTLEN DOWNTO 0) := (OTHERS => '0');
     SIGNAL cnt_en : std_logic;
+    
+    
+    SIGNAL tmp : std_logic := '0';
 BEGIN
 
     -- Frequenzteiler: Modulo 2^15
+    cnt_en <= cnt_tmp(CNTLEN);
+    cnt <= cnt_tmp(CNTLEN-1 DOWNTO 0);
+    
     PROCESS (rst, clk)
-        VARIABLE cnt_tmp : std_logic_vector(CNTLEN DOWNTO 0);
     BEGIN
         IF rst = RSTDEF THEN
-            cnt_tmp := (OTHERS => '0');
+            cnt_tmp <= (OTHERS => '0');
         ELSIF rising_edge(clk) THEN
             IF swrst = RSTDEF THEN
-                cnt_tmp := (OTHERS => '0');
+                cnt_tmp <= (OTHERS => '0');
             ELSE
-                cnt_tmp := '0' & cnt;
-                cnt_tmp := (cnt_tmp + 1);
+                cnt_tmp <= '0' & cnt + 1;
             END IF;
         END IF;
-        
-        cnt_en <= cnt_tmp(CNTLEN);
-        cnt <= cnt_tmp(CNTLEN-1 DOWNTO 0);
     END PROCESS;
     
     sbuf0 : sync_buffer
@@ -75,7 +77,19 @@ BEGIN
              dout => OPEN,
              redge => OPEN,
              fedge => dec);
-             
+    
+--  process(clk) 
+--  begin
+--      if rising_edge(clk) THEN
+--          tmp <= BTN2;
+--          if tmp = '0' and BTN2 = '1' then
+--              inc <= '1';
+--          elsif tmp = '1' and BTN2 = '0' then
+--              inc <= '0';
+--          end if;
+--      end if;
+--  end process;
+    
     sbuf2 : sync_buffer
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,

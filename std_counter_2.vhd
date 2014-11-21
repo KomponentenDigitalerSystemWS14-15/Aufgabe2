@@ -41,38 +41,32 @@ END std_counter;
 -- counter only flips carry on overflow
 
 ARCHITECTURE behavioral OF std_counter IS
-	SIGNAL cnt : std_logic_vector(CNTLEN DOWNTO 0) := (OTHERS => '0');
+	SIGNAL cnt : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL cnt_tmp : std_logic_vector(CNTLEN DOWNTO 0) := (OTHERS => '0');
+    SIGNAL cnt_c : std_logic := '0';
 BEGIN
     PROCESS (rst, clk) BEGIN
         IF rst = RSTDEF THEN
-            cnt <= (OTHERS => '0');
+            cnt_tmp <= (OTHERS => '0');
         ELSIF rising_edge(clk) THEN
             IF swrst = RSTDEF THEN
-                cnt <= (OTHERS => '0');
+                cnt_tmp <= (OTHERS => '0');
             ELSIF en = '1' THEN
                 IF load = '1' THEN
-                    cnt <= ('0' & din);
-                ELSIF dec = '1' THEN                    
-                    IF cnt(CNTLEN) = '1' THEN
-                        cnt <= cnt - 1;
-                        cnt(CNTLEN) <= '0';
-                    ELSE
-                        cnt <= cnt - 1;
-                    END IF;
+                    cnt_tmp <= ('0' & din);
+                ELSIF dec = '1' THEN
+                    cnt_tmp <= '0' & cnt - 1;
                 ELSIF inc = '1' THEN                 
-                    IF cnt(CNTLEN) = '1' THEN
-                        cnt <= cnt + 1;
-                        cnt(CNTLEN) <= '0';
-                    ELSE
-                        cnt <= cnt + 1;
-                    END IF;
+                    cnt_tmp <= '0' & cnt + 1;
                 END IF;
             END IF;
         END IF;
     END PROCESS;
     
     -- assign values to outports
-    cout <= cnt(CNTLEN);
-    dout <= cnt(CNTLEN-1 DOWNTO 0);
+    cnt_c <= cnt_tmp(CNTLEN);
+    cnt <= cnt_tmp(CNTLEN-1 DOWNTO 0);
+    cout <= cnt_c;
+    dout <= cnt;
     
 END behavioral;

@@ -18,7 +18,7 @@ END sync_buffer;
 -- sync_buffer waits 2**CNTLEN clock cycles until it puts din on dout
 
 ARCHITECTURE behavioral OF sync_buffer IS
-    CONSTANT CNTLEN : natural := 5; -- after 32 clock cycles value is applied
+    CONSTANT CNTLEN : natural := 10; -- after 32 clock cycles value is applied
     CONSTANT CNTFULL : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '1');
     CONSTANT CNTEMPTY : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
     
@@ -28,19 +28,18 @@ ARCHITECTURE behavioral OF sync_buffer IS
     SIGNAL flipflop1 : std_logic := '0';
     SIGNAL flipflop2 : std_logic := '0';
     
-    -- For rising or falling edge detection
-    SIGNAL oldState : std_logic := '0';
 BEGIN
     
-	PROCESS (rst, clk) BEGIN
+    dout <= state;
+    
+	PROCESS (rst, clk)
+    BEGIN
 		IF rst = RSTDEF THEN
             flipflop1 <= '0';
             flipflop2 <= '0';
             state <= '0';
             cnt <= CNTEMPTY;
             
-            oldState <= '0';
-			dout <= '0';
 			redge <= '0';
 			fedge <= '0';
 		ELSIF rising_edge(clk) THEN
@@ -50,13 +49,13 @@ BEGIN
                 state <= '0';
                 cnt <= CNTEMPTY;
                 
-                oldState <= '0';
-				dout <= '0';
 				redge <= '0';
 				fedge <= '0';
 			ELSIF en = '1' THEN
                 flipflop1 <= din;
                 flipflop2 <= flipflop1;
+                redge <= '0';
+                fedge <= '0';
                             
                 IF state = '0' THEN
                     IF flipflop2 = '0' THEN
@@ -67,6 +66,7 @@ BEGIN
                         IF cnt /= CNTFULL THEN
                             cnt <= cnt + 1;
                         ELSE
+                            redge <= '1';
                             state <= '1';
                         END IF;
                     END IF;
@@ -79,22 +79,10 @@ BEGIN
                         IF cnt /= CNTEMPTY THEN
                             cnt <= cnt - 1;
                         ELSE
+                            fedge <= '1';
                             state <= '0';
                         END IF;
                     END IF;
-                END IF;
-                
-                oldState <= state;
-                dout <= state;
-                
-                redge <= '0';
-                fedge <= '0';
-                
-                IF oldState = '0' AND state = '1' THEN
-                    redge <= '1';
-                END IF;
-                IF oldState = '1' AND state = '0' THEN
-                    fedge <= '1';
                 END IF;
             END IF;
         END IF;
