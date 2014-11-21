@@ -36,7 +36,7 @@ ARCHITECTURE behavioral OF sync_module IS
     SIGNAL cnt_en : std_logic;
     
     
-    SIGNAL tmp : std_logic := '0';
+    --SIGNAL tmp : std_logic := '0';
 BEGIN
 
     -- Frequenzteiler: Modulo 2^15

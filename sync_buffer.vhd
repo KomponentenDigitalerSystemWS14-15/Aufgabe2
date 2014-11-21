@@ -18,7 +18,7 @@ END sync_buffer;
 -- sync_buffer waits 2**CNTLEN clock cycles until it puts din on dout
 
 ARCHITECTURE behavioral OF sync_buffer IS
-    CONSTANT CNTLEN : natural := 10; -- after 32 clock cycles value is applied
+    CONSTANT CNTLEN : natural := 5; -- after 32 clock cycles value is applied
     CONSTANT CNTFULL : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '1');
     CONSTANT CNTEMPTY : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
     
