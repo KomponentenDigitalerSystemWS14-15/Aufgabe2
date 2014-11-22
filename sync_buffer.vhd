@@ -59,6 +59,7 @@ BEGIN
           
     dout <= din_deb;
     
+    -- debouncing like Maxim-Dallas MAX6816
     PROCESS (rst, clk)
     BEGIN
         IF rst = RSTDEF THEN
