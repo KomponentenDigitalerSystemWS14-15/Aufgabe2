@@ -44,35 +44,35 @@ BEGIN
     flipflop1 : flipflop
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
-             clk => clk,
-             en => en,
-             d => din,
-             q => q1);
-             
+            clk => clk,
+            en => en,
+            d => din,
+            q => q1);
+            
     flipflop2 : flipflop
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
-             clk => clk,
-             en => en,
-             d => q1,
-             q => q2);
-            
+            clk => clk,
+            en => en,
+            d => q1,
+            q => q2);
+          
     dout <= din_deb;
     
-	PROCESS (rst, clk)
+    PROCESS (rst, clk)
     BEGIN
-		IF rst = RSTDEF THEN
+        IF rst = RSTDEF THEN
             din_deb <= '0';
             cnt <= CNTEMPTY;
-			redge <= '0';
-			fedge <= '0';
-		ELSIF rising_edge(clk) THEN
             redge <= '0';
             fedge <= '0';
-			IF swrst = RSTDEF THEN
+        ELSIF rising_edge(clk) THEN
+            redge <= '0';
+            fedge <= '0';
+            IF swrst = RSTDEF THEN
                 din_deb <= '0';
                 cnt <= CNTEMPTY;
-			ELSIF en = '1' THEN  
+            ELSIF en = '1' THEN 
                 IF din_deb = q2 THEN
                     cnt <= CNTEMPTY;
                 ELSE
@@ -87,6 +87,6 @@ BEGIN
                 END IF;
             END IF;
         END IF;
-	END PROCESS;
+    END PROCESS;
     
 END behavioral;

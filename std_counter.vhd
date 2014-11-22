@@ -41,7 +41,7 @@ END std_counter;
 -- counter only flips carry on overflow
 
 ARCHITECTURE behavioral OF std_counter IS
-	SIGNAL cnt : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL cnt : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
     SIGNAL cnt_tmp : std_logic_vector(CNTLEN DOWNTO 0) := (OTHERS => '0');
     SIGNAL cnt_c : std_logic := '0';
 BEGIN
