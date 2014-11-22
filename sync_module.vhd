@@ -35,9 +35,6 @@ ARCHITECTURE behavioral OF sync_module IS
     SIGNAL cnt_tmp : std_logic_vector(CNTLEN DOWNTO 0) := (OTHERS => '0');
     SIGNAL cnt_en : std_logic;
     
---   CONSTANT GENLEN : natural := 10;
---   SIGNAL gen_cnt :std_logic_vector(GENLEN DOWNTO 0) := (OTHERS => '0');
-    
 BEGIN
 
     -- Frequenzteiler: Modulo 2^15
@@ -57,19 +54,6 @@ BEGIN
             END IF;
         END IF;
     END PROCESS;
-    
---  PROCESS (rst, clk)
---  BEGIN
---      IF rst = RSTDEF THEN
---          gen_cnt <= (OTHERS => '0');
---      ELSIF rising_edge(clk) THEN
---          IF swrst = RSTDEF THEN
---              gen_cnt <= (OTHERS => '0');
---          ELSIF cnt_en = '1' THEN
---              gen_cnt <= gen_cnt + 1;
---          END IF;
---      END IF;
---  END PROCESS;
     
     sbuf0 : sync_buffer
     GENERIC MAP(RSTDEF => RSTDEF)

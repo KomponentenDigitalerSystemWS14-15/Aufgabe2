@@ -23,7 +23,7 @@ ARCHITECTURE behavioral OF sync_buffer IS
     GENERIC(RSTDEF: std_logic);
     PORT(rst: IN std_logic;
          clk: IN std_logic;
-			swrst: IN std_logic;
+            swrst: IN std_logic;
          en: IN std_logic;
          d: IN std_logic;
          q: OUT std_logic);
@@ -46,7 +46,7 @@ BEGIN
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
             clk => clk,
-				swrst => swrst,
+                swrst => swrst,
             en => en,
             d => din,
             q => q1);
@@ -55,7 +55,7 @@ BEGIN
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
             clk => clk,
-				swrst => swrst,
+                swrst => swrst,
             en => en,
             d => q1,
             q => q2);
