@@ -33,7 +33,8 @@ ARCHITECTURE behavioral OF sync_buffer IS
     CONSTANT CNTEMPTY : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
     
     SIGNAL cnt : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL state : std_logic := '0';
+    
+    SIGNAL din_deb: std_logic := '0';
     
     SIGNAL q1 : std_logic := '0';
     SIGNAL q2 : std_logic := '0';
@@ -56,51 +57,33 @@ BEGIN
              d => q1,
              q => q2);
             
-    dout <= state;
+    dout <= din_deb;
     
 	PROCESS (rst, clk)
     BEGIN
 		IF rst = RSTDEF THEN
-            state <= '0';
+            din_deb <= '0';
             cnt <= CNTEMPTY;
 			redge <= '0';
 			fedge <= '0';
 		ELSIF rising_edge(clk) THEN
+            redge <= '0';
+            fedge <= '0';
 			IF swrst = RSTDEF THEN
-                state <= '0';
+                din_deb <= '0';
                 cnt <= CNTEMPTY;
-				redge <= '0';
-				fedge <= '0';
-			ELSIF en = '1' THEN
-                redge <= '0';
-                fedge <= '0';
-                            
-                IF state = '0' THEN
-                    IF q2 = '0' THEN
-                        IF cnt /= CNTEMPTY THEN
-                            cnt <= cnt - 1;
-                        END IF;
-                    ELSIF q2 = '1' THEN
-                        IF cnt /= CNTFULL THEN
-                            cnt <= cnt + 1;
-                        ELSE
-                            redge <= '1';
-                            state <= '1';
-                        END IF;
-                    END IF;
+			ELSIF en = '1' THEN  
+                IF din_deb = q2 THEN
+                    cnt <= CNTEMPTY;
                 ELSE
-                    IF q2 = '1' THEN
-                        IF cnt /= CNTFULL THEN
-                            cnt <= cnt + 1;
-                        END IF;
-                    ELSIF q2 = '0' THEN
-                        IF cnt /= CNTEMPTY THEN
-                            cnt <= cnt - 1;
-                        ELSE
-                            fedge <= '1';
-                            state <= '0';
-                        END IF;
-                    END IF;
+                    cnt <= cnt + 1;
+                END IF;
+                
+                IF cnt = CNTFULL THEN
+                    -- change output
+                    redge <= q2;
+                    fedge <= NOT q2;
+                    din_deb <= q2;
                 END IF;
             END IF;
         END IF;
