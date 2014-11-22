@@ -35,11 +35,10 @@ ARCHITECTURE behavioral OF sync_module IS
     SIGNAL cnt_tmp : std_logic_vector(CNTLEN DOWNTO 0) := (OTHERS => '0');
     SIGNAL cnt_en : std_logic;
     
-    
-    --SIGNAL tmp : std_logic := '0';
 BEGIN
 
     -- Frequenzteiler: Modulo 2^15
+    
     cnt_en <= cnt_tmp(CNTLEN);
     cnt <= cnt_tmp(CNTLEN-1 DOWNTO 0);
     
@@ -59,46 +58,34 @@ BEGIN
     sbuf0 : sync_buffer
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
-             clk => clk,
-             en => cnt_en,
-             swrst => swrst,
-             din => BTN0,
-             dout => OPEN,
-             redge => load,
-             fedge => OPEN);
-             
+            clk => clk,
+            en => cnt_en,
+            swrst => swrst,
+            din => BTN0,
+            dout => OPEN,
+            redge => load,
+            fedge => OPEN);
+            
     sbuf1 : sync_buffer
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
-             clk => clk,
-             en => cnt_en,
-             swrst => swrst,
-             din => BTN1,
-             dout => OPEN,
-             redge => OPEN,
-             fedge => dec);
-    
---  process(clk) 
---  begin
---      if rising_edge(clk) THEN
---          tmp <= BTN2;
---          if tmp = '0' and BTN2 = '1' then
---              inc <= '1';
---          elsif tmp = '1' and BTN2 = '0' then
---              inc <= '0';
---          end if;
---      end if;
---  end process;
-    
+            clk => clk,
+            en => cnt_en,
+            swrst => swrst,
+            din => BTN1,
+            dout => OPEN,
+            redge => OPEN,
+            fedge => dec);
+      
     sbuf2 : sync_buffer
     GENERIC MAP(RSTDEF => RSTDEF)
     PORT MAP(rst => rst,
-             clk => clk,
-             en => cnt_en,
-             swrst => swrst,
-             din => BTN2,
-             dout => OPEN,
-             redge => OPEN,
-             fedge => inc);
+            clk => clk,
+            en => cnt_en,
+            swrst => swrst,
+            din => BTN2,
+            dout => OPEN,
+            redge => OPEN,
+            fedge => inc);
 
 END behavioral;

@@ -4,7 +4,7 @@ USE ieee.std_logic_1164.ALL;
 USE ieee.std_logic_unsigned.ALL;
 
 ENTITY sync_buffer IS
-   GENERIC(RSTDEF:  std_logic := '1');
+   GENERIC(RSTDEF: std_logic := '1');
    PORT(rst:    IN  std_logic;  -- reset, RSTDEF active
         clk:    IN  std_logic;  -- clock, rising edge
         en:     IN  std_logic;  -- enable, high active
@@ -18,6 +18,16 @@ END sync_buffer;
 -- sync_buffer waits 2**CNTLEN clock cycles until it puts din on dout
 
 ARCHITECTURE behavioral OF sync_buffer IS
+    
+    COMPONENT flipflop IS
+    GENERIC(RSTDEF: std_logic);
+    PORT(rst: IN std_logic;
+         clk: IN std_logic;
+         en: IN std_logic;
+         d: IN std_logic;
+         q: OUT std_logic);
+    END COMPONENT;
+    
     CONSTANT CNTLEN : natural := 5; -- after 32 clock cycles value is applied
     CONSTANT CNTFULL : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '1');
     CONSTANT CNTEMPTY : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
@@ -25,44 +35,52 @@ ARCHITECTURE behavioral OF sync_buffer IS
     SIGNAL cnt : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
     SIGNAL state : std_logic := '0';
     
-    SIGNAL flipflop1 : std_logic := '0';
-    SIGNAL flipflop2 : std_logic := '0';
+    SIGNAL q1 : std_logic := '0';
+    SIGNAL q2 : std_logic := '0';
     
 BEGIN
     
+    flipflop1 : flipflop
+    GENERIC MAP(RSTDEF => RSTDEF)
+    PORT MAP(rst => rst,
+             clk => clk,
+             en => en,
+             d => din,
+             q => q1);
+             
+    flipflop2 : flipflop
+    GENERIC MAP(RSTDEF => RSTDEF)
+    PORT MAP(rst => rst,
+             clk => clk,
+             en => en,
+             d => q1,
+             q => q2);
+            
     dout <= state;
     
 	PROCESS (rst, clk)
     BEGIN
 		IF rst = RSTDEF THEN
-            flipflop1 <= '0';
-            flipflop2 <= '0';
             state <= '0';
             cnt <= CNTEMPTY;
-            
 			redge <= '0';
 			fedge <= '0';
 		ELSIF rising_edge(clk) THEN
 			IF swrst = RSTDEF THEN
-                flipflop1 <= '0';
-                flipflop2 <= '0';
                 state <= '0';
                 cnt <= CNTEMPTY;
-                
 				redge <= '0';
 				fedge <= '0';
 			ELSIF en = '1' THEN
-                flipflop1 <= din;
-                flipflop2 <= flipflop1;
                 redge <= '0';
                 fedge <= '0';
                             
                 IF state = '0' THEN
-                    IF flipflop2 = '0' THEN
+                    IF q2 = '0' THEN
                         IF cnt /= CNTEMPTY THEN
                             cnt <= cnt - 1;
                         END IF;
-                    ELSIF flipflop2 = '1' THEN
+                    ELSIF q2 = '1' THEN
                         IF cnt /= CNTFULL THEN
                             cnt <= cnt + 1;
                         ELSE
@@ -71,11 +89,11 @@ BEGIN
                         END IF;
                     END IF;
                 ELSE
-                    IF flipflop2 = '1' THEN
+                    IF q2 = '1' THEN
                         IF cnt /= CNTFULL THEN
                             cnt <= cnt + 1;
                         END IF;
-                    ELSIF flipflop2 = '0' THEN
+                    ELSIF q2 = '0' THEN
                         IF cnt /= CNTEMPTY THEN
                             cnt <= cnt - 1;
                         ELSE
