@@ -43,7 +43,6 @@ END std_counter;
 ARCHITECTURE behavioral OF std_counter IS
     SIGNAL cnt : std_logic_vector(CNTLEN-1 DOWNTO 0) := (OTHERS => '0');
     SIGNAL cnt_tmp : std_logic_vector(CNTLEN DOWNTO 0) := (OTHERS => '0');
-    SIGNAL cnt_c : std_logic := '0';
 BEGIN
     PROCESS (rst, clk) BEGIN
         IF rst = RSTDEF THEN
@@ -64,9 +63,8 @@ BEGIN
     END PROCESS;
     
     -- assign values to outports
-    cnt_c <= cnt_tmp(CNTLEN);
     cnt <= cnt_tmp(CNTLEN-1 DOWNTO 0);
-    cout <= cnt_c;
+    cout <= cnt_tmp(CNTLEN);
     dout <= cnt;
     
 END behavioral;
